@@ -8,7 +8,7 @@
 	<version>0.1.0</version>
 
 	<properties>
-		<start-class>com.copal.recomend.Application</start-class>
+		<start-class>com.soledede.recomend.Application</start-class>
 		<java.version>1.6</java.version>
 		<jackson.version>2.4.2</jackson.version>
 		<scala.version>2.10.4</scala.version>
