@@ -13,8 +13,8 @@ lib_managed/
 src_managed/
 project/boot/
 project/plugins/project/
-test_time_bomb/
-time_bomb/
+test_time_bomb/*
+time_bomb/(
 time_bomb_new/
 date/
 gradle/
