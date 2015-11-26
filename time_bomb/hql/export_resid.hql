@@ -1,1 +1,0 @@
-select resid from scores;
