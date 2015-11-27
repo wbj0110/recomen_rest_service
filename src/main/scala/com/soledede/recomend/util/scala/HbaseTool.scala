@@ -34,7 +34,7 @@ object HbaseTool {
     })
   }
 
-  def getSingleValue(tableName:String,rowKey:String,family:String,qualifiers:String):JSONArray={
+  def getSingleValue(tableName:String,rowKey:String,family:String,qualifiers:String):AnyRef={
     val table_t =getTable(tableName)
     val row1 =  new Get(Bytes.toBytes(rowKey))
     val HBaseRow = table_t.get(row1)
@@ -49,7 +49,7 @@ object HbaseTool {
        o.close()
       //bv = new String(HBaseRow.getValue(Bytes.toBytes(family), Bytes.toBytes(qualifiers)),"UTF-8")
       }
-      obh.asInstanceOf[JSONArray]
+      obh
   }
 
   def getValue(tableName:String,rowKey:String,family:String,qualifiers:Array[String]):Array[(String,String)]={
