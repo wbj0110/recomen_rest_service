@@ -5,14 +5,16 @@ package com.soledede.recomend.util.scala
  * Created by wengbenjue on 2014/9/15.
  */
 
-import java.io.{ObjectInputStream, ByteArrayInputStream}
+import java.io.{IOException, ObjectInputStream, ByteArrayInputStream}
 
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.hbase.client.{Put, Result, Get, HTable}
+import org.apache.hadoop.hbase.client._
+import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp
+import org.apache.hadoop.hbase.filter.{RowFilter, RegexStringComparator, Filter}
 import org.apache.hadoop.hbase.util.Bytes
 import scala.collection.mutable
-import scala.util.parsing.json.JSONArray
+import  scala.collection.JavaConversions._
 
 
 object HbaseTool {
@@ -93,6 +95,32 @@ object HbaseTool {
     })
     table.put(new_row)
   }
+
+  def scanLike(tableName:String,words: String):AnyRef={
+    val table =getTable(tableName)
+    val scan: Scan= new Scan();
+    val filter = new RowFilter(CompareOp.EQUAL,new RegexStringComparator(".*"+words));
+    scan.setFilter(filter);
+     var scanner:ResultScanner= null
+    var obh:AnyRef = null
+    try {
+      scanner = table.getScanner(scan);
+
+    for(res <- scanner){
+      val cellList = res.listCells()
+      val b = new ByteArrayInputStream(cellList.get(0).getValueArray)
+      val o = new ObjectInputStream(b)
+      obh = o.readObject()
+      o.close()
+    }
+
+    } catch {
+      case e: Exception => e.printStackTrace()
+    }
+    obh
+  }
+
+  def close(tableName: String) =getTable(tableName).close()
 
   val family = "F"
 }

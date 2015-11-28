@@ -1,22 +1,21 @@
 package com.soledede.recomend.util.scala
 
-import com.alibaba.fastjson.JSON
 
-import scala.List
+import java.util
+
 import scala.collection.JavaConversions._
 
 import org.apache.hadoop.hbase.HBaseConfiguration
 
-import HbaseTool
+import scala.collection.mutable.ListBuffer
+
 
 /**
-  * Provides DAL for Customer entities for MySQL database.
-  */
+ * Provides DAL for Customer entities for MySQL database.
+ */
+
 object ModuleDAO {
   private var hb = HbaseTool
-}
-
-class ModuleDAO {
 
   {
     //lond the config of Hbase，create Table recomend
@@ -30,32 +29,51 @@ class ModuleDAO {
 
 
   /**
-    *
-    * @param id
-    * @return
-    */
+   *
+   * @param id
+   * @return
+   */
   def get(id: String): java.util.List[String] = {
 
-    //val jsonaAyr:JSONArray = ModuleDAO.hb.getSingleValue("recomend",id,"fruitTopCF","fruitId")
+    val list: ListBuffer[String] = ModuleDAO.hb.getSingleValue("recommend", id, "fruitTopCF", "fruitId").asInstanceOf[ListBuffer[String]]
 
-    val jsonStr: String = ModuleDAO.hb.getSingleValue("recomend", id, "fruitTopCF", "fruitId").toString
-    val jsonaAyr = JSON.parseArray(jsonStr)
-    if (jsonaAyr == null || jsonaAyr.length <= 0) return null
-    val results = new java.util.ArrayList[String]()
-    var returnList = for (item <- jsonaAyr) yield {
-      val stringItem: String = String.valueOf(item)
-      val resArray = stringItem.split("::")
-      resArray(0)
+
+    //val jsonStr: String = ModuleDAO.hb.getSingleValue("recommend", id, "fruitTopCF", "fruitId").toString
+    //val jsonaAyr = JSON.parseArray(jsonStr)
+    result(list) match {
+      case Some(toReturn) => return toReturn
+      case None => null
     }
-
-    returnList = for (itemid <- returnList; if (itemid != null)) yield itemid
-    returnList.foreach { r => results.add(r) }
-    results.toList
   }
 
 
   def test() {
     println("yesk")
+  }
+
+  def filter(userId: String): java.util.List[String] = {
+    val list = ModuleDAO.hb.scanLike("recommend", userId.toInt.hashCode().toString).asInstanceOf[ListBuffer[String]]
+
+    result(list) match {
+      case Some(toReturn) => return toReturn
+      case None => null
+    }
+  }
+
+  def result(list: Seq[String]): Option[List[String]] = {
+    if (list == null || list.length <= 0) return Some(null)
+    val results = new util.ArrayList[String]()
+
+    var returnList = for (item <- list) yield {
+      val stringItem: String = String.valueOf(item)
+      val rArray = stringItem.split("::")
+      rArray(0)
+    }
+
+    returnList = for (itemid <- returnList; if (itemid != null)) yield itemid
+    returnList.foreach { r => results.add(r) }
+    results.toList
+    None
   }
 }
 
