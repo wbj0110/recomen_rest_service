@@ -8,6 +8,7 @@ import scala.collection.JavaConversions._
 import org.apache.hadoop.hbase.HBaseConfiguration
 
 import scala.collection.mutable.ListBuffer
+import scala.util.parsing.json.JSONArray
 
 
 /**
@@ -35,10 +36,11 @@ object ModuleDAO {
    */
   def get(id: String): java.util.List[String] = {
 
-    val list: ListBuffer[String] = ModuleDAO.hb.getSingleValue("recommend", id, "fruitTopCF", "fruitId").asInstanceOf[ListBuffer[String]]
+    //val list: ListBuffer[String] = ModuleDAO.hb.getSingleValue("recommend", id, "fruitTopCF", "fruitId").asInstanceOf[ListBuf
 
 
-    //val jsonStr: String = ModuleDAO.hb.getSingleValue("recommend", id, "fruitTopCF", "fruitId").toString
+    val jsonStr: JSONArray = ModuleDAO.hb.getSingleValue("recommend", id, "fruitTopCF", "fruitId").asInstanceOf[JSONArray]
+    val list = jsonStr.list
     //val jsonaAyr = JSON.parseArray(jsonStr)
     result(list) match {
       case Some(toReturn) => return toReturn
@@ -52,15 +54,14 @@ object ModuleDAO {
   }
 
   def filter(userId: String): java.util.List[String] = {
-    val list = ModuleDAO.hb.scanLike("recommend", userId.toInt.hashCode().toString).asInstanceOf[ListBuffer[String]]
-
-    result(list) match {
+    val list: JSONArray = ModuleDAO.hb.scanLike("recommend", userId.toInt.hashCode().toString).asInstanceOf[JSONArray]
+    result(list.list) match {
       case Some(toReturn) => return toReturn
       case None => null
     }
   }
 
-  def result(list: Seq[String]): Option[List[String]] = {
+  def result(list: Seq[Any]): Option[List[String]] = {
     if (list == null || list.length <= 0) return Some(null)
     val results = new util.ArrayList[String]()
 
@@ -72,11 +73,9 @@ object ModuleDAO {
 
     returnList = for (itemid <- returnList; if (itemid != null)) yield itemid
     returnList.foreach { r => results.add(r) }
-    results.toList
-    None
+    Some(results.toList)
   }
 }
-
 
 
 

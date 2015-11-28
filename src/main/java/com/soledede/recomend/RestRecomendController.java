@@ -17,8 +17,8 @@ public class RestRecomendController {
         if (userid == null) return new Msg("input, userid", -1, null);
         List result = null;
         try {
-           // result = new ModuleDAO().get(userid);
-            ModuleDAO.filter(userid);
+           result =  ModuleDAO.get(userid);
+            //result = ModuleDAO.filter(userid);
             if (result == null && result.size() <= 0) return new Msg("no info", 101, null);
         } catch (Exception e) {
             return new Msg("no iteminfo for  this user", 102, null);
